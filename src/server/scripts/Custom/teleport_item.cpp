@@ -7,6 +7,7 @@
 #include "ScriptMgr.h"
 #include "ScriptedGossip.h"
 #include "Spell.h"
+#include "WorldSession.h"
 #pragma execution_character_set("UTF-8")
 
 struct TeleportData {
@@ -92,7 +93,7 @@ public:
         SpellCastTargets const& /*targets*/) override  // Any hook here
     {
         if (player->IsInCombat()) {
-            ChatHandler(player->GetSession()).PSendSysMessage("Error: Player in combat.");
+            player->GetSession()->SendNotification("战斗中无法使用该物品");
             return true;
         }
         LoadTeleportItem();
