@@ -54,6 +54,7 @@
 #include "WorldPacket.h"
 #include <cstdarg>
 #include <zlib.h>
+#include "Item.h"
 
 void WorldSession::HandleRepopRequest(WorldPackets::Misc::RepopRequest& /*packet*/)
 {
@@ -110,6 +111,7 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recvData)
 
     Creature* unit = nullptr;
     GameObject* go = nullptr;
+    Item* item = nullptr;
     if (guid.IsCreatureOrVehicle())
     {
         unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_GOSSIP);
@@ -125,6 +127,15 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recvData)
         if (!go)
         {
             TC_LOG_DEBUG("network", "WORLD: HandleGossipSelectOptionOpcode - %s not found or you can't interact with it.", guid.ToString().c_str());
+            return;
+        }
+    }
+    else if (guid.IsItem())
+    {
+        item = _player->GetItemByGuid(guid);
+        if (!item || _player->IsBankPos(item->GetPos()))
+        {
+            TC_LOG_DEBUG("network", "WORLD: HandleGossipSelectOption - %s not found.", guid.ToString().c_str());
             return;
         }
     }
@@ -155,6 +166,10 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recvData)
             if (!unit->AI()->OnGossipSelectCode(_player, menuId, gossipListId, code.c_str()))
                 _player->OnGossipSelect(unit, gossipListId, menuId);
         }
+        else if (item)
+        {
+            sScriptMgr->OnGossipSelectCode(_player, item, menuId, gossipListId, code.c_str());
+        }
         else
         {
             if (!go->AI()->OnGossipSelectCode(_player, menuId, gossipListId, code.c_str()))
@@ -167,6 +182,10 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recvData)
         {
             if (!unit->AI()->OnGossipSelect(_player, menuId, gossipListId))
                 _player->OnGossipSelect(unit, gossipListId, menuId);
+        }
+        else if (item)
+        {
+            sScriptMgr->OnGossipSelect(_player, item, menuId, gossipListId);
         }
         else
         {

@@ -1563,6 +1563,24 @@ bool ScriptMgr::OnItemRemove(Player* player, Item* item)
     return tmpscript->OnRemove(player, item);
 }
 
+void ScriptMgr::OnGossipSelect(Player* player, Item* item, uint32 menuId, uint32 gossipListId)
+{
+    ASSERT(player);
+    ASSERT(item);
+
+    GET_SCRIPT(ItemScript, item->GetScriptId(), tmpscript);
+    tmpscript->OnGossipSelect(player, item, menuId, gossipListId);
+}
+
+void ScriptMgr::OnGossipSelectCode(Player* player, Item* item, uint32 menuId, uint32 gossipListId, const char* code)
+{
+    ASSERT(player);
+    ASSERT(item);
+
+    GET_SCRIPT(ItemScript, item->GetScriptId(), tmpscript);
+    tmpscript->OnGossipSelectCode(player, item, menuId, gossipListId, code);
+}
+
 bool ScriptMgr::OnCastItemCombatSpell(Player* player, Unit* victim, SpellInfo const* spellInfo, Item* item)
 {
     ASSERT(player);
